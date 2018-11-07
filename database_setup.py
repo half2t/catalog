@@ -14,6 +14,14 @@ class Categorie(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
+
+    @property
+    def serialize(self):
+        """Return serializeable data format"""
+        return {            
+            'id': self.id,
+            'name': self.name,
+        }
     
     
 class Item(Base):

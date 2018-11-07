@@ -1,8 +1,21 @@
 <html>
 <body>
+<h2>Categories</h2>
 <form action="" method ="post">
-<input type="text" palceholder="Categorie Name" name="categoriename">
-<input type="submit" value="Submit">
+<input type="text" palceholder="Categorie Name" name="categoriename"><br/>
+<input type="submit" value="Add Categorie">
 </form>
+<br/>
+<tabl>
+{% for i in categories %}
+<tr>
+<td>{{i.name}}</td>
+<td><a href="#">Items</a></td>
+<td><a href="#">Edit</a></td>
+<td><a href="delete_categorie?id={{i.id}}">Delete</a></td>
+</tr>
+</br>
+{% endfor %}
+</table>
 </body>
 </html>
