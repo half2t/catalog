@@ -13,14 +13,15 @@ class Categorie(Base):
     __tablename__ = "categorie"
     
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    name = Column(String(50), unique=True, nullable=False)
+    created_by = Column(Integer, nullable=False)
 
     @property
     def serialize(self):
-        """Return serializeable data format"""
         return {            
             'id': self.id,
             'name': self.name,
+            'created_by': self.created_by
         }
     
     
@@ -28,7 +29,8 @@ class Item(Base):
     __tablename__ = "item"
     
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    name = Column(String(50), nullable=False)
+    description = Column(String(200), nullable=False)
     categori_id = Column(Integer, ForeignKey('categorie.id'))
     categorie = relationship(Categorie)
     

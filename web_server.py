@@ -26,28 +26,43 @@ def index():
 
 # Insert new Categorie
 @app.route('/NewCateogrie', methods=['GET','POST'])
-def Add():
+def AddCategorie():
     if request.method == 'GET':
         categories = session.query(Categorie).all()
         return render_template('NewCategorie.html', categories=categories)
     if request.method == 'POST':
-        categorie = Categorie(name=request.form['categoriename'])
+        categorie = Categorie(name=request.form['categoriename'],created_by=22)
         session.add(categorie)
         session.commit()
-        return redirect(url_for('Add'))
+        return redirect(url_for('AddCategorie'))
+    
+# Insert new Item
+@app.route('/NewItem/<int:categorie_id>', methods=['GET','POST'])
+def AddItem(categorie_id):
+    if request.method == 'GET':
+        categorie = session.query(Categorie).filter_by(id=categorie_id).one()
+        items = session.query(Item).filter_by(categori_id=categorie_id).all()
+        return render_template('CategorieItems.html', categorie=categorie,
+                               items=items)
+    if request.method == 'POST':
+        item = Item(name=request.form['itemname']
+        , description=request.form['description'], categori_id=categorie_id)
+        session.add(item)
+        session.commit()
+        return redirect(url_for('AddItem', categorie_id=categorie_id))
     
     
 # Delete Categorie
-@app.route('/NewCateogrie', methods=['GET','Delete'])
-def Delete():
-    if request.method == 'GET':
-        categories = session.query(Categorie).all()
-        return render_template('NewCategorie.html', categories=categories)
+@app.route('/DeleteItem/item_id', methods=['GET','Delete'])
+def deleteItem(item_id):
+    item = session.query(Item).filter_by(id=item_id).one()
     if request.method == 'POST':
-        categorie = Categorie(name=request.form['categoriename'])
-        session.add(categorie)
+        session.delete(item)
         session.commit()
-        return redirect(url_for('Add'))
+        flash("Menu Item has been deleted")
+        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
+    else:
+        return render_template('deleteconfirmation.html', item=itemToDelete)
 
 
 # Return List of categories as Json

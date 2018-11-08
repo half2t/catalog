@@ -1,1 +1,1 @@
-Place your catalog project in this directory.
+bootstrap: https://getbootstrap.com/, https://www.w3schools.com
