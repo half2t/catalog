@@ -33,50 +33,16 @@
 <hr />    
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
-    <legend class="scheduler-border">{{categorie.name}}/Add Item - <a href="/NewCateogrie">Back to categories</a></legend>
+    <legend class="scheduler-border">{{item.categorie.name}}/Edit Items - <a href="/NewItem/{{item.categori_id}}">Back to items</a></legend>
     <div class="form-group">
       <label for="itemname">Title:</label>
-      <input placeholder="Title" type="text" tabindex="1" name="itemname" class="form-control" maxlength="50" required>
+      <input type="text" tabindex="1" name="itemname" class="form-control" maxlength="50" value="{{item.name}}" required>
+      <input type="hidden" name="item_id" value="item.item_id">
     </div>
     <div class="form-group">
       <label for="description">Description:</label>
-      <input placeholder="Description" type="text" tabindex="2" name="description" class="form-control" maxlength="200" required>
+      <input type="text" tabindex="2" name="item_description" class="form-control" maxlength="200" value="{{item.description}}" required>
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
     </fieldset>
   </form>
-  <br />
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th scope="col">Title</th>
-      <th scope="col">Description</th>
-      <th scope="col"></th><th scope="col"></th>
-    </tr>
-  </thead>
-  <tbody>
-  {% for i in items %}
-    <tr>
-      <td>{{i.name}}</td>
-      <td>{{i.description}}</td>
-      <td><button type="button" class="btn btn-primary" onclick="Edit('{{i.id}}')">Edit</button></td>
-      <td><button type="button" class="btn btn-danger" onclick="Delete('{{i.id}}')">Delete</button></td>
-    </tr>
-  {% endfor %}
-  </tbody> 
-</table>
-</div>
-</body>
-</html>
-
-<script>
-function Delete(id) {
-  var r = confirm("Are you sure you want to delete item?");
-    if (r == true) {
-        window.location = "/DeleteItem/" + id;
-    } 
-}
-function Edit(id) {
-  window.location = "/EditItem/" + id;
-}
-</script>

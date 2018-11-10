@@ -29,10 +29,11 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
+<a href="#">Logout</a>
 <hr />   
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
-    <legend class="scheduler-border">Categories</legend>
+    <legend class="scheduler-border">Categorie</legend>
     <div class="form-group">
       <label for="itemname">Title:</label>
       <input placeholder="Title" type="text" tabindex="1" name="categoriename" class="form-control" maxlength="50" required>
@@ -55,10 +56,10 @@
   <tbody>
   {% for i in categories %}
     <tr>
-      <td>{{i.name}}</td>
-      <td><a href="NewItem/{{i.id}}">Items</a></td>
-      <td><a href="ItemsJSON/{{i.id}}" target="_blank">Json Items</a></td>
-      <td><button type="button" class="btn btn-primary" onclick="DeleteConfirm('{{i.id}}')">Edit</button></td>
+      <td>{{i.name}}</td> 
+      <td><button type="button" class="btn btn-primary" onclick="Items('{{i.id}}')">Items</button></td>
+      <td><button type="button" class="btn btn-primary" onclick="ItemsJSON('{{i.id}}')">Json Items</button></td>       
+      <td><button type="button" class="btn btn-primary" onclick="Edit('{{i.id}}')">Edit</button></td>
       <td><button type="button" class="btn btn-danger" onclick="Delete('{{i.id}}')">Delete</button></td>
     </tr>
   {% endfor %}
@@ -72,7 +73,16 @@
 function Delete(id) {
   var r = confirm("Are you sure you want to delete categorie and all related items?");
     if (r == true) {
-        window.location = "http://localhost:8000/DeleteCategorie/" + id;
+        window.location = "/DeleteCategorie/" + id;
     } 
+}
+function Edit(id) {
+    window.location = "/EditCateogrie/" + id;
+}
+function Items(id) {
+    window.location = "/NewItem/" + id;
+}
+function ItemsJSON(id) {
+    window.open("/ItemsJSON/" + id, '_blank');
 }
 </script>

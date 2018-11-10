@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Categories</title>
+<title>Items</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -11,19 +11,21 @@
 <div class="container">  
 <h1>Catalog</h1>
 <a href="#">Register</a> | <a href="#">Sign in</a>
-<hr />   
+<hr />
+<h3>{{categorie.name}}/Items - <a href="/index">Back to categories</a></h3>
+
 <table class="table table-striped">
   <thead>
     <tr>
-      <th scope="col">Categorie</th>
-      <th scope="col"></th>
+      <th scope="col">Title</th>
+      <th scope="col">Description</th>
     </tr>
   </thead>
   <tbody>
-  {% for i in categories %}
+  {% for i in items %}
     <tr>
-      <td>{{i.name}}</td> 
-      <td><button type="button" class="btn btn-primary" onclick="Items('{{i.id}}')">Items</button></td>    
+      <td>{{i.name}}</td>
+      <td>{{i.description}}</td>
     </tr>
   {% endfor %}
   </tbody> 
@@ -31,9 +33,3 @@
 </div>
 </body>
 </html>
-
-<script>
-function Items(id) {
-    window.location = "/Items/" + id;
-}
-</script>

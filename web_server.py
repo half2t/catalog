@@ -19,19 +19,25 @@ session = DBSession()
 @app.route('/')
 @app.route('/index')
 def index():
-    categories = session.query(Categorie).all()
-    items = session.query(Item).all()
-    return render_template('index.html')
+    categories = session.query(Categorie).filter_by(created_by=22).all()
+    return render_template('index.html', categories=categories)
+
+
+@app.route('/Items/<int:categorie_id>')
+def Items(categorie_id):
+    categorie = session.query(Categorie).filter_by(id=categorie_id).one()
+    items = session.query(Item).filter_by(categori_id=categorie_id).all()
+    return render_template('Items.html', categorie=categorie, items=items)
 
 
 # Insert new Categorie
 @app.route('/NewCateogrie', methods=['GET','POST'])
 def AddCategorie():
     if request.method == 'GET':
-        categories = session.query(Categorie).all()
+        categories = session.query(Categorie).filter_by(created_by=22).all()
         return render_template('NewCategorie.html', categories=categories)
     if request.method == 'POST':
-        categorie = Categorie(name=request.form['categoriename'],created_by=55)
+        categorie = Categorie(name=request.form['categoriename'],created_by=22)
         session.add(categorie)
         session.commit()
         return redirect(url_for('AddCategorie'))
@@ -51,6 +57,35 @@ def AddItem(categorie_id):
         session.add(item)
         session.commit()
         return redirect(url_for('AddItem', categorie_id=categorie_id))
+    
+    
+# Edit Categorie
+@app.route('/EditCateogrie/<int:categorie_id>', methods=['GET','POST'])
+def EditCategorie(categorie_id):
+    if request.method == 'GET':
+        categorie = session.query(Categorie).filter_by(id=categorie_id).one()
+        return render_template('EditCategorie.html', categorie=categorie)
+    if request.method == 'POST':
+        categorie = session.query(Categorie).filter_by(id=categorie_id).one()
+        categorie.name = request.form['categoriename']
+        session.add(categorie)
+        session.commit()
+        return redirect(url_for('AddCategorie'))
+    
+    
+# Edit Item
+@app.route('/EditItem/<int:item_id>', methods=['GET','POST'])
+def EditItem(item_id):
+    if request.method == 'GET':
+        item = session.query(Item).filter_by(id=item_id).one()
+        return render_template('EditItem.html', item=item)
+    if request.method == 'POST':
+        item = session.query(Item).filter_by(id=item_id).one()
+        item.name = request.form['itemname']
+        item.description = request.form['item_description']
+        session.add(item)
+        session.commit()
+        return redirect(url_for('AddItem', categorie_id=item.categori_id))
     
  
 # Delete Categorie
