@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Items</title>
+<title>Delete Items</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -32,7 +32,7 @@
 <hr />    
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
-    <legend class="scheduler-border">{{categorie.name}} - Add Items</legend>
+    <legend class="scheduler-border">{{categorie.name}} - Delete Items</legend>
     <div class="form-group">
       <label for="itemname">Title:</label>
       <input placeholder="Title" type="text" tabindex="1" name="itemname" class="form-control" maxlength="50" required>
@@ -58,8 +58,8 @@
     <tr>
       <td>{{i.name}}</td>
       <td>{{i.description}}</td>
-      <td><button type="button" class="btn btn-primary" onclick="DeleteConfirm('{{i.id}}')">Edit</button></td>
-      <td><button type="button" class="btn btn-danger" onclick="Delete('{{i.id}}')">Delete</button></td>
+      <td><a href="edit_item?id={{i.id}}">Edit</a></td>
+      <td><a href="delete_item?id={{i.id}}">Delete</a></td>
     </tr>
   {% endfor %}
   </tbody> 
@@ -67,12 +67,3 @@
 </div>
 </body>
 </html>
-
-<script>
-function Delete(id) {
-  var r = confirm("Are you sure you want to delete item?");
-    if (r == true) {
-        window.location = "http://localhost:8000/DeleteItem/" + id;
-    } 
-}
-</script>

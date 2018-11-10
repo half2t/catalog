@@ -31,10 +31,11 @@ def AddCategorie():
         categories = session.query(Categorie).all()
         return render_template('NewCategorie.html', categories=categories)
     if request.method == 'POST':
-        categorie = Categorie(name=request.form['categoriename'],created_by=22)
+        categorie = Categorie(name=request.form['categoriename'],created_by=55)
         session.add(categorie)
         session.commit()
         return redirect(url_for('AddCategorie'))
+    
     
 # Insert new Item
 @app.route('/NewItem/<int:categorie_id>', methods=['GET','POST'])
@@ -51,18 +52,28 @@ def AddItem(categorie_id):
         session.commit()
         return redirect(url_for('AddItem', categorie_id=categorie_id))
     
-    
+ 
 # Delete Categorie
-@app.route('/DeleteItem/item_id', methods=['GET','Delete'])
+@app.route('/DeleteCategorie/<int:categorie_id>')
+def DeleteCategorie(categorie_id):
+    categorie = session.query(Categorie).filter_by(id=categorie_id).one()
+    items = session.query(Item).filter_by(categori_id=categorie_id).all()
+    for item in items:
+     session.delete(item)
+    session.commit()
+    session.delete(categorie)
+    session.commit()
+    return redirect(url_for('AddCategorie'))
+
+
+# Delete Item
+@app.route('/DeleteItem/<int:item_id>')
 def deleteItem(item_id):
     item = session.query(Item).filter_by(id=item_id).one()
-    if request.method == 'POST':
-        session.delete(item)
-        session.commit()
-        flash("Menu Item has been deleted")
-        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
-    else:
-        return render_template('deleteconfirmation.html', item=itemToDelete)
+    categorie_id = item.categori_id
+    session.delete(item)
+    session.commit()
+    return redirect(url_for('AddItem', categorie_id=categorie_id))
 
 
 # Return List of categories as Json
@@ -70,6 +81,13 @@ def deleteItem(item_id):
 def CategoriesJSON():
     categories = session.query(Categorie).all()
     return jsonify(categories=[i.serialize for i in categories])
+
+
+# Return List of items as Json
+@app.route('/ItemsJSON/<int:categorie_id>')
+def ItemsJSON(categorie_id):
+    items = session.query(Item).filter_by(categori_id=categorie_id).all()
+    return jsonify(items=[i.serialize for i in items])
     
 
 if __name__ == '__main__':

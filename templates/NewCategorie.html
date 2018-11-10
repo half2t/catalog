@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Items</title>
+<title>Categories</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -29,7 +29,7 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
-<hr />    
+<hr />   
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
     <legend class="scheduler-border">Categories</legend>
@@ -41,19 +41,25 @@
     </fieldset>
   </form>
   <br />
+  {% if categories: %}
+  <a href="CategoriesJSON" target="_blank">Json Categories</a>
+  <br /><br /><br />
+  {% endif %}
 <table class="table table-striped">
   <thead>
     <tr>
       <th scope="col">Title</th>
-      <th scope="col"></th><th scope="col"></th>
+      <th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th>
     </tr>
   </thead>
   <tbody>
   {% for i in categories %}
     <tr>
       <td>{{i.name}}</td>
-      <td><a href="edit_item?id={{i.id}}">Edit</a></td>
-      <td><a href="delete_item?id={{i.id}}">Delete</a></td>
+      <td><a href="NewItem/{{i.id}}">Items</a></td>
+      <td><a href="ItemsJSON/{{i.id}}" target="_blank">Json Items</a></td>
+      <td><button type="button" class="btn btn-primary" onclick="DeleteConfirm('{{i.id}}')">Edit</button></td>
+      <td><button type="button" class="btn btn-danger" onclick="Delete('{{i.id}}')">Delete</button></td>
     </tr>
   {% endfor %}
   </tbody> 
@@ -61,3 +67,12 @@
 </div>
 </body>
 </html>
+
+<script>
+function Delete(id) {
+  var r = confirm("Are you sure you want to delete categorie and all related items?");
+    if (r == true) {
+        window.location = "http://localhost:8000/DeleteCategorie/" + id;
+    } 
+}
+</script>
