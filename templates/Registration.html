@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Edit Categories</title>
+<title>Registration</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -29,15 +29,18 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
-<a href="/Logout">Logout</a>
+<a href="/Login">Sign in</a>
 <hr />   
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
-    <legend class="scheduler-border">Edit Categorie - <a href="/NewCateogrie">Back to categories</a></legend>
+    <legend class="scheduler-border">Registration</legend>
     <div class="form-group">
-      <label for="itemname">Title:</label>
-      <input type="text" tabindex="1" name="categoriename" class="form-control" maxlength="50" value="{{categorie.name}}" required>
-      <input type="hidden" name="categorie_id" value="{{categorie.id}}" >
+      <label for="itemname">Full Name:</label>
+      <input placeholder="Full Name" type="text" tabindex="1" name="fullname" class="form-control" maxlength="50" required>
+      <label for="itemname">Username:</label>
+      <input placeholder="UserName" type="text" tabindex="1" name="username" class="form-control" maxlength="20" required>
+      <label for="itemname">Password:</label>
+      <input placeholder="Password" type="password" tabindex="1" name="passwd" class="form-control" maxlength="20" required>
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
     </fieldset>

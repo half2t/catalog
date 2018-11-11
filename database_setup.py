@@ -31,7 +31,7 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     description = Column(String(200), nullable=False)
-    categori_id = Column(Integer, ForeignKey('categorie.id'))
+    categorie_id = Column(Integer, ForeignKey('categorie.id'))
     categorie = relationship(Categorie)
     
     @property
@@ -40,9 +40,18 @@ class Item(Base):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'categori_id': self.categori_id,
+            'categori_id': self.categorie_id,
             'categorie_name': self.categorie.name
         }
+        
+        
+class User(Base):
+    __tablename__ = "user"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    username = Column(String(20), nullable=False)
+    passwd = Column(String(20), nullable=False)
     
     
 engine = create_engine('sqlite:///catalog.db')
