@@ -34,7 +34,7 @@ def Items(categorie_id):
 
 
 # Registration
-@app.route('/Registration', methods=['GET','POST'])
+@app.route('/Registration', methods=['GET', 'POST'])
 def Registration():
     if request.method == 'GET':
         return render_template('Registration.html')
@@ -45,16 +45,17 @@ def Registration():
             flash('This username already exsists!')
             return redirect(url_for('Registration'))
         hash_object = hashlib.md5(request.form['passwd'].encode())
-        user = User(name=request.form['fullname'], 
-                    username=request.form['username'], 
+        user = User(name=request.form['fullname'],
+                    username=request.form['username'],
                     passwd=hash_object.hexdigest())
         dbsession.add(user)
         dbsession.commit()
         flash('Operation completed successfully')
         return redirect(url_for('Login'))
-    
-# Login  
-@app.route('/Login', methods=['GET','POST'])
+
+
+# Login
+@app.route('/Login', methods=['GET', 'POST'])
 def Login():
     if request.method == 'GET':
         session.pop('UserId', None)
@@ -62,17 +63,18 @@ def Login():
         return render_template('Login.html')
     if request.method == 'POST':
         hash_object = hashlib.md5(request.form['passwd'].encode())
-        user = dbsession.query(User).filter_by(username=request.form['username'],
-                            passwd=hash_object.hexdigest()).first()
+        user = dbsession.query(User).filter_by(
+                username=request.form['username'],
+                passwd=hash_object.hexdigest()).first()
         if user:
-          session['UserId'] = user.id
-          session['Name'] = user.name
-          return redirect(url_for('AddCategorie'))
+            session['UserId'] = user.id
+            session['Name'] = user.name
+            return redirect(url_for('AddCategorie'))
         else:
             flash('Incorrect username or password!')
             return redirect(url_for('Login'))
-        
-        
+
+
 # Logout
 @app.route('/Logout')
 def Logout():
@@ -82,7 +84,7 @@ def Logout():
 
 
 # Insert new Categorie
-@app.route('/NewCateogrie', methods=['GET','POST'])
+@app.route('/NewCateogrie', methods=['GET', 'POST'])
 def AddCategorie():
     if not session.get('UserId'):
         return redirect(url_for('Login'))
@@ -96,16 +98,16 @@ def AddCategorie():
         if categorie:
             flash('This categorie already exsist!')
             return redirect(url_for('AddCategorie'))
-        categorie = Categorie(name=request.form['categoriename']
-        ,created_by=session['UserId'])
+        categorie = Categorie(name=request.form['categoriename'],
+                              created_by=session['UserId'])
         dbsession.add(categorie)
         dbsession.commit()
         flash('Operation completed successfully')
         return redirect(url_for('AddCategorie'))
-    
-    
+
+
 # Insert new Item
-@app.route('/NewItem/<int:categorie_id>', methods=['GET','POST'])
+@app.route('/NewItem/<int:categorie_id>', methods=['GET', 'POST'])
 def AddItem(categorie_id):
     if not session.get('UserId'):
         return redirect(url_for('Login'))
@@ -116,22 +118,23 @@ def AddItem(categorie_id):
         return render_template('CategorieItems.html', categorie=categorie,
                                items=items)
     if request.method == 'POST':
-        item = Item(name=request.form['itemname']
-        , description=request.form['description'], categorie_id=categorie_id)
+        item = Item(name=request.form['itemname'],
+                    description=request.form['description'],
+                    categorie_id=categorie_id)
         dbsession.add(item)
         dbsession.commit()
         flash('Operation completed successfully')
         return redirect(url_for('AddItem', categorie_id=categorie_id))
-    
-    
+
+
 # Edit Categorie
-@app.route('/EditCateogrie/<int:categorie_id>', methods=['GET','POST'])
+@app.route('/EditCateogrie/<int:categorie_id>', methods=['GET', 'POST'])
 def EditCategorie(categorie_id):
     if not session.get('UserId'):
         return redirect(url_for('Login'))
     if request.method == 'GET':
-        categorie = dbsession.query(Categorie).filter_by(id=categorie_id,
-                                 created_by=session['UserId']).one()
+        categorie = dbsession.query(Categorie).filter_by(
+                id=categorie_id, created_by=session['UserId']).one()
         return render_template('EditCategorie.html', categorie=categorie)
     if request.method == 'POST':
         categorie = dbsession.query(Categorie).filter_by(id=categorie_id).one()
@@ -140,10 +143,10 @@ def EditCategorie(categorie_id):
         dbsession.commit()
         flash('Operation completed successfully')
         return redirect(url_for('AddCategorie'))
-    
-    
+
+
 # Edit Item
-@app.route('/EditItem/<int:item_id>', methods=['GET','POST'])
+@app.route('/EditItem/<int:item_id>', methods=['GET', 'POST'])
 def EditItem(item_id):
     if not session.get('UserId'):
         return redirect(url_for('Login'))
@@ -158,8 +161,8 @@ def EditItem(item_id):
         dbsession.commit()
         flash('Operation completed successfully')
         return redirect(url_for('AddItem', categorie_id=item.categorie_id))
-    
- 
+
+
 # Delete Categorie
 @app.route('/DeleteCategorie/<int:categorie_id>')
 def DeleteCategorie(categorie_id):
@@ -168,8 +171,8 @@ def DeleteCategorie(categorie_id):
     categorie = dbsession.query(Categorie).filter_by(id=categorie_id).one()
     items = dbsession.query(Item).filter_by(categorie_id=categorie_id).all()
     if items:
-      for item in items:
-        dbsession.delete(item)
+        for item in items:
+            dbsession.delete(item)
     dbsession.commit()
     dbsession.delete(categorie)
     dbsession.commit()
@@ -202,7 +205,7 @@ def CategoriesJSON():
 def ItemsJSON(categorie_id):
     items = dbsession.query(Item).filter_by(categorie_id=categorie_id).all()
     return jsonify(items=[i.serialize for i in items])
-    
+
 
 if __name__ == '__main__':
     app.debug = True
