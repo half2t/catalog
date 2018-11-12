@@ -30,7 +30,14 @@
 <div class="container">  
 <h1>Catalog</h1>
 <a href="/Login">Sign in</a>
-<hr />   
+<hr /> 
+{% with messages = get_flashed_messages() %}
+   {% if messages %}
+      {% for message in messages %}
+         <h4>Feedback: {{ message }}</h4>
+      {% endfor %}
+   {% endif %}
+{% endwith %}   
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
     <legend class="scheduler-border">Registration</legend>

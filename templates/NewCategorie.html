@@ -29,8 +29,15 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
-<a href="/Logout">Logout</a>
+<h4>welcome: {{session['Name']}} | <a href="/Logout">Logout</a></h4>
 <hr />   
+{% with messages = get_flashed_messages() %}
+   {% if messages %}
+      {% for message in messages %}
+         <h4>Feedback: {{ message }}</h4>
+      {% endfor %}
+   {% endif %}
+{% endwith %}
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
     <legend class="scheduler-border">Categorie</legend>
