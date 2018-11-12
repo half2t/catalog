@@ -50,7 +50,7 @@ class User(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
-    username = Column(String(20), nullable=False)
+    username = Column(String(20), unique=True, nullable=False)
     passwd = Column(String(20), nullable=False)
     
     

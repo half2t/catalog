@@ -39,6 +39,11 @@ def Registration():
     if request.method == 'GET':
         return render_template('Registration.html')
     if request.method == 'POST':
+        user = dbsession.query(User).filter_by(
+                username=request.form['username']).first()
+        if user:
+            flash('This username already exsists!')
+            return redirect(url_for('Registration'))
         hash_object = hashlib.md5(request.form['passwd'].encode())
         user = User(name=request.form['fullname'], 
                     username=request.form['username'], 
@@ -64,6 +69,7 @@ def Login():
           session['Name'] = user.name
           return redirect(url_for('AddCategorie'))
         else:
+            flash('Incorrect username or password!')
             return redirect(url_for('Login'))
         
         
@@ -85,6 +91,11 @@ def AddCategorie():
                 created_by=session['UserId']).all()
         return render_template('NewCategorie.html', categories=categories)
     if request.method == 'POST':
+        categorie = dbsession.query(Categorie).filter_by(
+                name=request.form['categoriename']).first()
+        if categorie:
+            flash('This categorie already exsist!')
+            return redirect(url_for('AddCategorie'))
         categorie = Categorie(name=request.form['categoriename']
         ,created_by=session['UserId'])
         dbsession.add(categorie)
