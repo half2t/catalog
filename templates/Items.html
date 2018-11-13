@@ -10,7 +10,12 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
-<a href="/Registration">Register</a> | <a href="/Login">Sign in</a>
+{% if session.get('access_token'): %}
+<a href="/NewCateogrie">My Categories</a>
+{% endif %}
+{% if not session.get('access_token'): %}
+<a href="/Login">Sign in</a>
+{% endif %}
 <hr />
 <h3>{{categorie.name}}/Items - <a href="/index">Back to categories</a></h3>
 <table class="table table-striped">

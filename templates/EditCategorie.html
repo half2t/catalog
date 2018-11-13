@@ -29,7 +29,7 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
-<h4>welcome: {{session['Name']}} | <a href="/Logout">Logout</a></h4>
+<h4>welcome: {{session['Name']}} | <a href="/index">Home</a> | <a href="/Logout">Logout</a></h4>
 <hr />  
 {% with messages = get_flashed_messages() %}
    {% if messages %}

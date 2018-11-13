@@ -29,7 +29,7 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
-<h4>welcome: {{session['Name']}} | <a href="/Logout">Logout</a></h4>
+<h4>welcome: {{session['Name']}} | <a href="/index">Home</a> | <a href="/Logout">Logout</a></h4>
 <hr />   
 {% with messages = get_flashed_messages() %}
    {% if messages %}
@@ -64,8 +64,8 @@
   {% for i in categories %}
     <tr>
       <td>{{i.name}}</td> 
-      <td><button type="button" class="btn btn-primary" onclick="Items('{{i.id}}')">Items</button></td>
-      <td><button type="button" class="btn btn-primary" onclick="ItemsJSON('{{i.id}}')">Json Items</button></td>       
+      <td><button type="button" class="btn btn-info" onclick="CategorieJSON('{{i.id}}')">Json Categorie</button></td>      
+      <td><button type="button" class="btn btn-primary" onclick="Items('{{i.id}}')">Items</button></td>      
       <td><button type="button" class="btn btn-primary" onclick="Edit('{{i.id}}')">Edit</button></td>
       <td><button type="button" class="btn btn-danger" onclick="Delete('{{i.id}}')">Delete</button></td>
     </tr>
@@ -92,7 +92,7 @@ function Items(id) {
     window.location = "/NewItem/" + id;
 }
 
-function ItemsJSON(id) {
-    window.open("/ItemsJSON/" + id, '_blank');
+function CategorieJSON(id) {
+    window.open("/CategorieJSON/" + id, '_blank');
 }
 </script>

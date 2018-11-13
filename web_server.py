@@ -5,8 +5,27 @@ from flask import Flask, render_template, request, session
 from flask import redirect, url_for, jsonify, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Categorie, Item, User
-import hashlib
+from database_setup import Base, Categorie, Item
+from flask_oauth import OAuth
+import json
+
+# You must configure these 3 values from Google APIs console
+# https://code.google.com/apis/console
+GOOGLE_CLIENT_ID = '59212569067-j9mbu9odf67kchpi8g5d0gcd24odhtso.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = 'Ce_r84pKBmnz-eh5v7Sc0A5Q'
+REDIRECT_URI = '/oauth2callback'  # Redirect URIs from Google APIs console
+oauth = OAuth()
+google = oauth.remote_app('google',
+                          base_url='https://www.google.com/accounts/',
+                          authorize_url='https://accounts.google.com/o/oauth2/auth',
+                          request_token_url=None,
+                          request_token_params={'scope': 'https://www.googleapis.com/auth/userinfo.email',
+                                                'response_type': 'code'},
+                          access_token_url='https://accounts.google.com/o/oauth2/token',
+                          access_token_method='POST',
+                          access_token_params={'grant_type': 'authorization_code'},
+                          consumer_key=GOOGLE_CLIENT_ID,
+                          consumer_secret=GOOGLE_CLIENT_SECRET)
 
 app = Flask(__name__)
 app.secret_key = "mohamed%$#^&^%$ahmed@@#||L?>"
@@ -14,83 +33,83 @@ app.secret_key = "mohamed%$#^&^%$ahmed@@#||L?>"
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
 
-DBSession = sessionmaker(bind=engine)
-dbsession = DBSession()
+MyDbSession = sessionmaker(bind=engine)
 
 
-# Home Page
+@app.route(REDIRECT_URI)
+@google.authorized_handler
+def authorized(resp):
+    access_token = resp['access_token']
+    session['access_token'] = access_token, ''
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+ 
+    access_token = access_token[0]
+    from urllib2 import Request, urlopen, URLError
+ 
+    headers = {'Authorization': 'OAuth '+access_token}
+    req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
+                  None, headers)
+    try:
+        res = urlopen(req)
+        data = json.load(res)
+        session['Email'] = data['email']
+        session['Name'] = data['name']
+    except URLError, e:
+        if e.code == 401:
+            # Unauthorized - bad token
+            session.pop('access_token', None)
+            return redirect(url_for('Login'))
+    return redirect(url_for('AddCategorie'))
+ 
+ 
+@google.tokengetter
+def get_access_token():
+    return session.get('access_token')
+
+
+# Home Page list all available categories
 @app.route('/')
 @app.route('/index')
 def index():
+    dbsession = MyDbSession()
     categories = dbsession.query(Categorie).all()
     return render_template('index.html', categories=categories)
 
-
+# list all available items
 @app.route('/Items/<int:categorie_id>')
 def Items(categorie_id):
+    dbsession = MyDbSession()
     categorie = dbsession.query(Categorie).filter_by(id=categorie_id).one()
     items = dbsession.query(Item).filter_by(categorie_id=categorie_id).all()
     return render_template('Items.html', categorie=categorie, items=items)
 
 
-# Registration
-@app.route('/Registration', methods=['GET', 'POST'])
-def Registration():
-    if request.method == 'GET':
-        return render_template('Registration.html')
-    if request.method == 'POST':
-        user = dbsession.query(User).filter_by(
-                username=request.form['username']).first()
-        if user:
-            flash('This username already exsists!')
-            return redirect(url_for('Registration'))
-        hash_object = hashlib.md5(request.form['passwd'].encode())
-        user = User(name=request.form['fullname'],
-                    username=request.form['username'],
-                    passwd=hash_object.hexdigest())
-        dbsession.add(user)
-        dbsession.commit()
-        flash('Operation completed successfully')
-        return redirect(url_for('Login'))
-
-
 # Login
-@app.route('/Login', methods=['GET', 'POST'])
+@app.route('/Login')
 def Login():
-    if request.method == 'GET':
-        session.pop('UserId', None)
-        session.pop('Name', None)
-        return render_template('Login.html')
-    if request.method == 'POST':
-        hash_object = hashlib.md5(request.form['passwd'].encode())
-        user = dbsession.query(User).filter_by(
-                username=request.form['username'],
-                passwd=hash_object.hexdigest()).first()
-        if user:
-            session['UserId'] = user.id
-            session['Name'] = user.name
-            return redirect(url_for('AddCategorie'))
-        else:
-            flash('Incorrect username or password!')
-            return redirect(url_for('Login'))
+    callback=url_for('authorized', _external=True)
+    return google.authorize(callback=callback)
 
 
 # Logout
 @app.route('/Logout')
 def Logout():
-    session.pop('UserId', None)
-    session.pop('Name', None)
+    if session:
+        session.clear()
     return redirect(url_for('index'))
 
 
 # Insert new Categorie
 @app.route('/NewCateogrie', methods=['GET', 'POST'])
 def AddCategorie():
-    if not session.get('UserId'):
+    dbsession = MyDbSession()
+    if not session.get('Email'):
         return redirect(url_for('Login'))
     if request.method == 'GET':
         categories = dbsession.query(Categorie).filter_by(
-                created_by=session['UserId']).all()
+                created_by=session.get('Email')).all()
         return render_template('NewCategorie.html', categories=categories)
     if request.method == 'POST':
         categorie = dbsession.query(Categorie).filter_by(
@@ -99,7 +118,7 @@ def AddCategorie():
             flash('This categorie already exsist!')
             return redirect(url_for('AddCategorie'))
         categorie = Categorie(name=request.form['categoriename'],
-                              created_by=session['UserId'])
+                              created_by=session.get('Email'))
         dbsession.add(categorie)
         dbsession.commit()
         flash('Operation completed successfully')
@@ -109,18 +128,21 @@ def AddCategorie():
 # Insert new Item
 @app.route('/NewItem/<int:categorie_id>', methods=['GET', 'POST'])
 def AddItem(categorie_id):
-    if not session.get('UserId'):
+    dbsession = MyDbSession()
+    access_token = session.get('access_token')
+    if access_token is None:
         return redirect(url_for('Login'))
     if request.method == 'GET':
-        categorie = dbsession.query(Categorie).filter_by(id=categorie_id).one()
-        items = dbsession.query(Item).filter_by(
-                categorie_id=categorie_id).all()
+        categorie = dbsession.query(Categorie).filter_by(id=categorie_id,
+                              created_by=session.get('Email')).one()
+        items = dbsession.query(Item).filter_by(categorie_id=categorie_id, 
+                               created_by=session.get('Email')).all()
         return render_template('CategorieItems.html', categorie=categorie,
                                items=items)
     if request.method == 'POST':
         item = Item(name=request.form['itemname'],
                     description=request.form['description'],
-                    categorie_id=categorie_id)
+                    categorie_id=categorie_id, created_by=session.get('Email'))
         dbsession.add(item)
         dbsession.commit()
         flash('Operation completed successfully')
@@ -130,14 +152,17 @@ def AddItem(categorie_id):
 # Edit Categorie
 @app.route('/EditCateogrie/<int:categorie_id>', methods=['GET', 'POST'])
 def EditCategorie(categorie_id):
-    if not session.get('UserId'):
+    dbsession = MyDbSession()
+    access_token = session.get('access_token')
+    if access_token is None:
         return redirect(url_for('Login'))
     if request.method == 'GET':
         categorie = dbsession.query(Categorie).filter_by(
-                id=categorie_id, created_by=session['UserId']).one()
+                id=categorie_id, created_by=session.get('Email')).one()
         return render_template('EditCategorie.html', categorie=categorie)
     if request.method == 'POST':
-        categorie = dbsession.query(Categorie).filter_by(id=categorie_id).one()
+        categorie = dbsession.query(Categorie).filter_by(id=categorie_id,
+                              created_by=session.get('Email')).one()
         categorie.name = request.form['categoriename']
         dbsession.add(categorie)
         dbsession.commit()
@@ -148,13 +173,17 @@ def EditCategorie(categorie_id):
 # Edit Item
 @app.route('/EditItem/<int:item_id>', methods=['GET', 'POST'])
 def EditItem(item_id):
-    if not session.get('UserId'):
+    dbsession = MyDbSession()
+    access_token = session.get('access_token')
+    if access_token is None:
         return redirect(url_for('Login'))
     if request.method == 'GET':
-        item = dbsession.query(Item).filter_by(id=item_id).one()
+        item = dbsession.query(Item).filter_by(id=item_id,
+                              created_by=session.get('Email')).one()
         return render_template('EditItem.html', item=item)
     if request.method == 'POST':
-        item = dbsession.query(Item).filter_by(id=item_id).one()
+        item = dbsession.query(Item).filter_by(id=item_id,
+                              created_by=session.get('Email')).one()
         item.name = request.form['itemname']
         item.description = request.form['item_description']
         dbsession.add(item)
@@ -166,14 +195,12 @@ def EditItem(item_id):
 # Delete Categorie
 @app.route('/DeleteCategorie/<int:categorie_id>')
 def DeleteCategorie(categorie_id):
-    if not session.get('UserId'):
+    dbsession = MyDbSession()
+    access_token = session.get('access_token')
+    if access_token is None:
         return redirect(url_for('Login'))
-    categorie = dbsession.query(Categorie).filter_by(id=categorie_id).one()
-    items = dbsession.query(Item).filter_by(categorie_id=categorie_id).all()
-    if items:
-        for item in items:
-            dbsession.delete(item)
-    dbsession.commit()
+    categorie = dbsession.query(Categorie).filter_by(id=categorie_id,
+                              created_by=session.get('Email')).one()
     dbsession.delete(categorie)
     dbsession.commit()
     flash('Operation completed successfully')
@@ -183,9 +210,12 @@ def DeleteCategorie(categorie_id):
 # Delete Item
 @app.route('/DeleteItem/<int:item_id>')
 def deleteItem(item_id):
-    if not session.get('UserId'):
+    dbsession = MyDbSession()
+    access_token = session.get('access_token')
+    if access_token is None:
         return redirect(url_for('Login'))
-    item = dbsession.query(Item).filter_by(id=item_id).one()
+    item = dbsession.query(Item).filter_by(id=item_id,
+                              created_by=session.get('Email')).one()
     categorie_id = item.categorie_id
     dbsession.delete(item)
     dbsession.commit()
@@ -196,17 +226,39 @@ def deleteItem(item_id):
 # Return List of categories as Json
 @app.route('/CategoriesJSON')
 def CategoriesJSON():
-    categories = dbsession.query(Categorie).all()
+    dbsession = MyDbSession()
+    categories = dbsession.query(Categorie).filter_by(
+            created_by=session.get('Email')).all()
     return jsonify(categories=[i.serialize for i in categories])
+
+
+# Return categorie as Json
+@app.route('/CategorieJSON/<int:categorie_id>')
+def CategorieJSON(categorie_id):
+    dbsession = MyDbSession()
+    categorie = dbsession.query(Categorie).filter_by(id=categorie_id, 
+                               created_by=session.get('Email')).one()
+    return jsonify(categorie=categorie.serialize)
 
 
 # Return List of items as Json
 @app.route('/ItemsJSON/<int:categorie_id>')
 def ItemsJSON(categorie_id):
-    items = dbsession.query(Item).filter_by(categorie_id=categorie_id).all()
+    dbsession = MyDbSession()
+    items = dbsession.query(Item).filter_by(categorie_id=categorie_id, 
+                           created_by=session.get('Email')).all()
     return jsonify(items=[i.serialize for i in items])
+
+
+# Return item as Json
+@app.route('/ItemJSON/<int:item_id>')
+def ItemJSON(item_id):
+    dbsession = MyDbSession()
+    item = dbsession.query(Item).filter_by(id=item_id, 
+                          created_by=session.get('Email')).one()
+    return jsonify(item=item.serialize)
 
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='127.0.0.1', port=8000)

@@ -14,7 +14,8 @@ class Categorie(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False)
-    created_by = Column(Integer, nullable=False)
+    created_by = Column(String(100), nullable=False)
+    items = relationship("Item", cascade="all,delete", backref="categorie")
 
     @property
     def serialize(self):
@@ -31,8 +32,8 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     description = Column(String(200), nullable=False)
+    created_by = Column(String(100), nullable=False)
     categorie_id = Column(Integer, ForeignKey('categorie.id'))
-    categorie = relationship(Categorie)
 
     @property
     def serialize(self):
@@ -41,17 +42,9 @@ class Item(Base):
             'name': self.name,
             'description': self.description,
             'categori_id': self.categorie_id,
-            'categorie_name': self.categorie.name
+            'categorie_name': self.categorie.name,
+            'created_by': self.created_by
         }
-
-
-class User(Base):
-    __tablename__ = "user"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), nullable=False)
-    username = Column(String(20), unique=True, nullable=False)
-    passwd = Column(String(20), nullable=False)
 
 
 engine = create_engine('sqlite:///catalog.db')

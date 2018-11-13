@@ -18,8 +18,19 @@ named catalog.db
 5. You can Register by clicking the Register link
 6. You can Login by clicking the Sign in link
 -----------------------------------------------------------------
+#### JSON Endpoints
+-----------------------------------------------------------------
+There is four jason endpoints:
+-----------------------------------------------------------------
+1. List all categories in json format
+2. List selected categorie in json format
+3. List all categorie's items in json format
+4. List selected item in json format
+-----------------------------------------------------------------
 #### Note
 -----------------------------------------------------------------
-All css style and bootstrap has been taken from websites below:
+All css style and bootstrap have taken from websites below:
 1. https://www.w3schools.com/
 2. https://getbootstrap.com/
+Google authentication method has taken from website below:
+1. https://pythonspot.com/login-to-flask-app-with-google/ 

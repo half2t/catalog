@@ -29,7 +29,7 @@
 <body>
 <div class="container">  
 <h1>Catalog</h1>
-<h4>welcome: {{session['Name']}} | <a href="/Logout">Logout</a></h4>
+<h4>welcome: {{session['Name']}} | <a href="/index">Home</a> | <a href="/Logout">Logout</a></h4>
 <hr />   
 {% with messages = get_flashed_messages() %}
    {% if messages %}
@@ -53,6 +53,10 @@
     </fieldset>
   </form>
   <br />
+    {% if items: %}
+  <a href="/ItemsJSON/{{categorie.id}}" target="_blank">Json items</a>
+  <br /><br /><br />
+  {% endif %}
 <table class="table table-striped">
   <thead>
     <tr>
@@ -66,6 +70,7 @@
     <tr>
       <td>{{i.name}}</td>
       <td>{{i.description}}</td>
+      <td><button type="button" class="btn btn-info" onclick="ItemJSON('{{i.id}}')">Json Item</button></td> 
       <td><button type="button" class="btn btn-primary" onclick="Edit('{{i.id}}')">Edit</button></td>
       <td><button type="button" class="btn btn-danger" onclick="Delete('{{i.id}}')">Delete</button></td>
     </tr>
@@ -86,5 +91,9 @@ function Delete(id) {
 
 function Edit(id) {
   window.location = "/EditItem/" + id;
+}
+
+function ItemJSON(id) {
+    window.open("/ItemJSON/" + id, '_blank');
 }
 </script>
