@@ -11,19 +11,24 @@ import json
 
 # You must configure these 3 values from Google APIs console
 # https://code.google.com/apis/console
-GOOGLE_CLIENT_ID = '59212569067-j9mbu9odf67kchpi8g5d0gcd24odhtso.apps.googleusercontent.com'
+GOOGLE_CLIENT_ID = '59212569067-j9mbu9odf67kchpi8g5d0gcd24odhtso.apps.googleus'
+GOOGLE_CLIENT_ID += 'ercontent.com'
 GOOGLE_CLIENT_SECRET = 'Ce_r84pKBmnz-eh5v7Sc0A5Q'
 REDIRECT_URI = '/oauth2callback'  # Redirect URIs from Google APIs console
 oauth = OAuth()
+authorize_url = 'https://accounts.google.com/o/oauth2/auth'
+scope = 'https://www.googleapis.com/auth/userinfo.email'
+access_token_url = 'https://accounts.google.com/o/oauth2/token'
+grant_type = 'authorization_code'
 google = oauth.remote_app('google',
                           base_url='https://www.google.com/accounts/',
-                          authorize_url='https://accounts.google.com/o/oauth2/auth',
+                          authorize_url=authorize_url,
                           request_token_url=None,
-                          request_token_params={'scope': 'https://www.googleapis.com/auth/userinfo.email',
+                          request_token_params={'scope': scope,
                                                 'response_type': 'code'},
-                          access_token_url='https://accounts.google.com/o/oauth2/token',
+                          access_token_url=access_token_url,
                           access_token_method='POST',
-                          access_token_params={'grant_type': 'authorization_code'},
+                          access_token_params={'grant_type': grant_type},
                           consumer_key=GOOGLE_CLIENT_ID,
                           consumer_secret=GOOGLE_CLIENT_SECRET)
 
@@ -44,10 +49,10 @@ def authorized(resp):
     access_token = session.get('access_token')
     if access_token is None:
         return redirect(url_for('login'))
- 
+
     access_token = access_token[0]
     from urllib2 import Request, urlopen, URLError
- 
+
     headers = {'Authorization': 'OAuth '+access_token}
     req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
                   None, headers)
@@ -62,8 +67,8 @@ def authorized(resp):
             session.pop('access_token', None)
             return redirect(url_for('Login'))
     return redirect(url_for('AddCategorie'))
- 
- 
+
+
 @google.tokengetter
 def get_access_token():
     return session.get('access_token')
@@ -77,6 +82,7 @@ def index():
     categories = dbsession.query(Categorie).all()
     return render_template('index.html', categories=categories)
 
+
 # list all available items
 @app.route('/Items/<int:categorie_id>')
 def Items(categorie_id):
@@ -89,7 +95,7 @@ def Items(categorie_id):
 # Login
 @app.route('/Login')
 def Login():
-    callback=url_for('authorized', _external=True)
+    callback = url_for('authorized', _external=True)
     return google.authorize(callback=callback)
 
 
@@ -133,10 +139,11 @@ def AddItem(categorie_id):
     if access_token is None:
         return redirect(url_for('Login'))
     if request.method == 'GET':
-        categorie = dbsession.query(Categorie).filter_by(id=categorie_id,
-                              created_by=session.get('Email')).one()
-        items = dbsession.query(Item).filter_by(categorie_id=categorie_id, 
-                               created_by=session.get('Email')).all()
+        categorie = dbsession.query(Categorie).filter_by(
+                id=categorie_id, created_by=session.get('Email')).one()
+        items = dbsession.query(Item).filter_by(
+                categorie_id=categorie_id,
+                created_by=session.get('Email')).all()
         return render_template('CategorieItems.html', categorie=categorie,
                                items=items)
     if request.method == 'POST':
@@ -161,8 +168,8 @@ def EditCategorie(categorie_id):
                 id=categorie_id, created_by=session.get('Email')).one()
         return render_template('EditCategorie.html', categorie=categorie)
     if request.method == 'POST':
-        categorie = dbsession.query(Categorie).filter_by(id=categorie_id,
-                              created_by=session.get('Email')).one()
+        categorie = dbsession.query(Categorie).filter_by(
+                id=categorie_id, created_by=session.get('Email')).one()
         categorie.name = request.form['categoriename']
         dbsession.add(categorie)
         dbsession.commit()
@@ -178,12 +185,12 @@ def EditItem(item_id):
     if access_token is None:
         return redirect(url_for('Login'))
     if request.method == 'GET':
-        item = dbsession.query(Item).filter_by(id=item_id,
-                              created_by=session.get('Email')).one()
+        item = dbsession.query(Item).filter_by(
+                id=item_id, created_by=session.get('Email')).one()
         return render_template('EditItem.html', item=item)
     if request.method == 'POST':
-        item = dbsession.query(Item).filter_by(id=item_id,
-                              created_by=session.get('Email')).one()
+        item = dbsession.query(Item).filter_by(
+                id=item_id, created_by=session.get('Email')).one()
         item.name = request.form['itemname']
         item.description = request.form['item_description']
         dbsession.add(item)
@@ -199,8 +206,8 @@ def DeleteCategorie(categorie_id):
     access_token = session.get('access_token')
     if access_token is None:
         return redirect(url_for('Login'))
-    categorie = dbsession.query(Categorie).filter_by(id=categorie_id,
-                              created_by=session.get('Email')).one()
+    categorie = dbsession.query(Categorie).filter_by(
+            id=categorie_id, created_by=session.get('Email')).one()
     dbsession.delete(categorie)
     dbsession.commit()
     flash('Operation completed successfully')
@@ -214,8 +221,8 @@ def deleteItem(item_id):
     access_token = session.get('access_token')
     if access_token is None:
         return redirect(url_for('Login'))
-    item = dbsession.query(Item).filter_by(id=item_id,
-                              created_by=session.get('Email')).one()
+    item = dbsession.query(Item).filter_by(
+            id=item_id, created_by=session.get('Email')).one()
     categorie_id = item.categorie_id
     dbsession.delete(item)
     dbsession.commit()
@@ -236,8 +243,8 @@ def CategoriesJSON():
 @app.route('/CategorieJSON/<int:categorie_id>')
 def CategorieJSON(categorie_id):
     dbsession = MyDbSession()
-    categorie = dbsession.query(Categorie).filter_by(id=categorie_id, 
-                               created_by=session.get('Email')).one()
+    categorie = dbsession.query(Categorie).filter_by(
+            id=categorie_id, created_by=session.get('Email')).one()
     return jsonify(categorie=categorie.serialize)
 
 
@@ -245,8 +252,8 @@ def CategorieJSON(categorie_id):
 @app.route('/ItemsJSON/<int:categorie_id>')
 def ItemsJSON(categorie_id):
     dbsession = MyDbSession()
-    items = dbsession.query(Item).filter_by(categorie_id=categorie_id, 
-                           created_by=session.get('Email')).all()
+    items = dbsession.query(Item).filter_by(
+            categorie_id=categorie_id, created_by=session.get('Email')).all()
     return jsonify(items=[i.serialize for i in items])
 
 
@@ -254,8 +261,8 @@ def ItemsJSON(categorie_id):
 @app.route('/ItemJSON/<int:item_id>')
 def ItemJSON(item_id):
     dbsession = MyDbSession()
-    item = dbsession.query(Item).filter_by(id=item_id, 
-                          created_by=session.get('Email')).one()
+    item = dbsession.query(Item).filter_by(
+            id=item_id, created_by=session.get('Email')).one()
     return jsonify(item=item.serialize)
 
 
