@@ -140,7 +140,10 @@ def AddItem(categorie_id):
         return redirect(url_for('Login'))
     if request.method == 'GET':
         categorie = dbsession.query(Categorie).filter_by(
-                id=categorie_id, created_by=session.get('Email')).one()
+                id=categorie_id, created_by=session.get('Email')).first()
+        if categorie is None:
+            flash('No data found!')
+            return redirect(url_for('AddCategorie'))
         items = dbsession.query(Item).filter_by(
                 categorie_id=categorie_id,
                 created_by=session.get('Email')).all()
@@ -165,7 +168,10 @@ def EditCategorie(categorie_id):
         return redirect(url_for('Login'))
     if request.method == 'GET':
         categorie = dbsession.query(Categorie).filter_by(
-                id=categorie_id, created_by=session.get('Email')).one()
+                id=categorie_id, created_by=session.get('Email')).first()
+        if categorie is None:
+            flash('No data found!')
+            return redirect(url_for('AddCategorie'))
         return render_template('EditCategorie.html', categorie=categorie)
     if request.method == 'POST':
         categorie = dbsession.query(Categorie).filter_by(
@@ -186,7 +192,10 @@ def EditItem(item_id):
         return redirect(url_for('Login'))
     if request.method == 'GET':
         item = dbsession.query(Item).filter_by(
-                id=item_id, created_by=session.get('Email')).one()
+                id=item_id, created_by=session.get('Email')).first()
+        if item is None:
+            flash('No data found!')
+            return redirect(url_for('AddCategorie'))
         return render_template('EditItem.html', item=item)
     if request.method == 'POST':
         item = dbsession.query(Item).filter_by(
@@ -268,4 +277,4 @@ def ItemJSON(item_id):
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='127.0.0.1', port=8000)
+    app.run(host='localhost', port=8000)

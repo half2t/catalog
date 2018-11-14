@@ -40,7 +40,7 @@
 {% endwith %}    
   <form id="item" action="" method="post">  
   <fieldset class="scheduler-border">
-    <legend class="scheduler-border">{{item.categorie.name}}/Edit Items - <a href="/NewItem/{{item.categori_id}}">Back to items</a></legend>
+    <legend class="scheduler-border">{{item.categorie.name}}/Edit Items - <a href="/NewItem/{{item.categorie_id}}">Back to items</a></legend>
     <div class="form-group">
       <label for="itemname">Title:</label>
       <input type="text" tabindex="1" name="itemname" class="form-control" maxlength="50" value="{{item.name}}" required>
